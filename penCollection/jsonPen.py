@@ -1,3 +1,4 @@
+#MenuTitle: JSON Pen
 # -*- coding: utf-8 -*-
 
 import json
@@ -472,7 +473,8 @@ json_data
 
 
 if __name__ == '__main__':
-    from defcon import Font
+	from robofab.world import CurrentFont
+    #from defcon import Font
     
     verbose = False
     

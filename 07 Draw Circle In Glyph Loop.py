@@ -1,3 +1,5 @@
+#MenuTitle: 07 Draw Circle In Glyph Loop
+from robofab.world import CurrentGlyph
 from math import cos, degrees, pi, radians, sin
 
 

@@ -1,3 +1,6 @@
+#MenuTitle: 13 Randomize Glyph
+from robofab.world import CurrentFont, CurrentGlyph
+from robofab.objects.objectsRF import RGlyph
 from fontTools.pens.basePen import BasePen
 from random import randint
 

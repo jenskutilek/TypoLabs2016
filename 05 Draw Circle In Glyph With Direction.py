@@ -1,3 +1,6 @@
+#MenuTitle: 05 Draw Circle In Glyph With Direction
+from robofab.world import CurrentGlyph
+
 def draw_circle(pen, (x, y), diameter=50, clockwise=False, roundness=0.552):
     
     radius = 0.5 * diameter

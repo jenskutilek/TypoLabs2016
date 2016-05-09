@@ -1,3 +1,5 @@
+#MenuTitle: 20 HPGL Converter
+from robofab.world import CurrentGlyph
 from fontTools.pens.basePen import BasePen
 
 

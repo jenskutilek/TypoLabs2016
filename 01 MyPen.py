@@ -1,3 +1,5 @@
+#MenuTitle: 01 MyPen
+from robofab.world import CurrentGlyph
 from fontTools.pens.basePen import AbstractPen
 
 class MyPen(AbstractPen):

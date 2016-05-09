@@ -1,3 +1,5 @@
+#MenuTitle: 06 Draw Circle In Glyph With Direction
+from robofab.world import CurrentGlyph
 from math import cos, degrees, pi, radians, sin
 
 

@@ -1,3 +1,4 @@
+#MenuTitle: SVG Pen
 from fontTools.pens.basePen import BasePen
 from robofab.pens.pointPen import PrintingSegmentPen
 

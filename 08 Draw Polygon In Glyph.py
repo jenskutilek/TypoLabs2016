@@ -1,3 +1,5 @@
+#MenuTitle: 08 Draw Polygon In Glyph
+from robofab.world import CurrentGlyph
 from math import cos, degrees, pi, radians, sin
 
 

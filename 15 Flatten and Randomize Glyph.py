@@ -1,3 +1,6 @@
+#MenuTitle: 15 Flatten And Randomize Glyph
+from robofab.world import CurrentFont
+from robofab.objects.objectsRF import RGlyph
 from fontTools.pens.basePen import BasePen
 from random import randint
 from robofab.pens.filterPen import flattenGlyph

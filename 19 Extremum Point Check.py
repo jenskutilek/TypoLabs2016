@@ -1,3 +1,5 @@
+#MenuTitle: 19 Extremum Point Check
+from robofab.world import CurrentFont, CurrentGlyph
 from fontTools.pens.basePen import BasePen
 
 

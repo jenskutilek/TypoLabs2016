@@ -1,3 +1,4 @@
+#MenuTitle: Outline Pen
 """
 Source: https://github.com/typemytype/goldnerRoboFontExtension/blob/master/Goldener.roboFontExt/lib/outlinePen.py
 

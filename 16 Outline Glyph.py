@@ -1,3 +1,6 @@
+#MenuTitle: 16 Outline Glyph
+from robofab.world import CurrentGlyph
+from robofab.objects.objectsRF import RGlyph
 from penCollection.outlinePen import OutlinePen
 
 """

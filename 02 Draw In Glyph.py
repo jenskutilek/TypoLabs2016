@@ -1,3 +1,6 @@
+#MenuTitle: 02 Draw In Glyph
+from robofab.world import CurrentGlyph
+
 CurrentGlyph().clear()
 p = CurrentGlyph().getPen()
 

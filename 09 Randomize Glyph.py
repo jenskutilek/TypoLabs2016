@@ -1,3 +1,5 @@
+#MenuTitle: 09 Randomize Glyph
+from robofab.world import CurrentFont, CurrentGlyph
 from fontTools.pens.basePen import BasePen
 
 class MyPen(BasePen):

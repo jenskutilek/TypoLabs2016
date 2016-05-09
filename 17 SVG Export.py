@@ -1,7 +1,10 @@
+#MenuTitle: 17 SVG Export
+
 # SVG pen implementation (C) 2012 by Andreas Eigendorf
 # MIT license
 # https://github.com/fontfont/RoboChrome/blob/master/RoboChrome.roboFontExt/lib/colorfont/svgPen.py
 
+from robofab.world import CurrentGlyph
 from fontTools.pens.basePen import BasePen
 from os import system
 from os.path import expanduser

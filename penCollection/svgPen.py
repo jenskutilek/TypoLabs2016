@@ -170,7 +170,12 @@ A pen that converts a glyph outline to an SVG path. After drawing, SVGPen.d cont
         self.prev_y = 0
         BasePen.__init__(self, glyphSet)
         self.d = ''
+        self.start = True
     
+    def reset(self):
+        self.d = ''
+        self.start = True
+        
     def _append_shorter(self, absolute, relative):
         if not self._rel and len(absolute) <= len(relative) or not self._opt:
             self.d += absolute
@@ -195,7 +200,12 @@ A pen that converts a glyph outline to an SVG path. After drawing, SVGPen.d cont
             r = 'm%s' % (x - self.prev_x)
             r += self._get_shorter_sign(y - self.prev_y)
         
-        self._append_shorter(a, r)
+        if self.start:
+            # Don't use relative coordinates for the very first move
+            self.d += a
+            self.start = False
+        else:
+            self._append_shorter(a, r)
         self.prev_x = x
         self.prev_y = y
     

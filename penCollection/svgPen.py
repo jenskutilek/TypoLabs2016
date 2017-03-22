@@ -1,6 +1,5 @@
 #MenuTitle: SVG Pen
 from fontTools.pens.basePen import BasePen
-from robofab.pens.pointPen import PrintingSegmentPen
 
 
 # See also:
@@ -170,11 +169,9 @@ A pen that converts a glyph outline to an SVG path. After drawing, SVGPen.d cont
         self.prev_y = 0
         BasePen.__init__(self, glyphSet)
         self.d = ''
-        self.start = True
     
     def reset(self):
         self.d = ''
-        self.start = True
         
     def _append_shorter(self, absolute, relative):
         if not self._rel and len(absolute) <= len(relative) or not self._opt:
@@ -192,20 +189,10 @@ A pen that converts a glyph outline to an SVG path. After drawing, SVGPen.d cont
         if self._rnd:
             a = 'M%s' % int(round(x))
             a += self._get_shorter_sign(int(round(y)))
-            r = 'm%s' % int(round(x - self.prev_x))
-            r += self._get_shorter_sign(int(round(y - self.prev_y)))
         else:
             a = 'M%s' % x
             a += self._get_shorter_sign(y)
-            r = 'm%s' % (x - self.prev_x)
-            r += self._get_shorter_sign(y - self.prev_y)
-        
-        if self.start:
-            # Don't use relative coordinates for the very first move
-            self.d += a
-            self.start = False
-        else:
-            self._append_shorter(a, r)
+        self.d += a
         self.prev_x = x
         self.prev_y = y
     

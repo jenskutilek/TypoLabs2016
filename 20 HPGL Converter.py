@@ -80,6 +80,7 @@ class HPGLPen(BasePen):
     def _closePath(self):
         if self._prev_segment not in ["line", "curve"]:
             self._hpgl += ";PD"
+            pt = self._get_scaled_pt(self.lastMove)
             self._hpgl += "%s,%s\n" % pt
         else:
             self._hpgl += ","

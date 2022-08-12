@@ -1,4 +1,4 @@
-#MenuTitle: 02 Draw In Glyph
+# MenuTitle: 02 Draw In Glyph
 from robofab.world import CurrentGlyph
 
 CurrentGlyph().clear()

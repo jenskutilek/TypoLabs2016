@@ -481,11 +481,11 @@ if __name__ == '__main__':
     f = CurrentFont()
     
     g = JsonGlyphDF(f['B'], verbose=verbose, indent=3)
-    print '\nJSON for "B":'
-    print g.json
+    print('\nJSON for "B":')
+    print(g.json)
     
     g = JsonGlyphDF(f['A'], verbose=verbose, indent=3)
-    print '\nJSON for "A":'
-    print g.json
-    print 'Digest:         ', g.digest
-    print 'Digest (Visual):', g.visual_digest
+    print('\nJSON for "A":')
+    print(g.json)
+    print('Digest:         ', g.digest)
+    print('Digest (Visual):', g.visual_digest)

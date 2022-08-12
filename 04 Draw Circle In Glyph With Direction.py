@@ -1,11 +1,11 @@
 #MenuTitle: 04 Draw Circle In Glyph With Direction
-from robofab.world import CurrentGlyph
+from mojo.roboFont import CurrentGlyph
 
-def draw_circle(pen, (x, y), diameter=50, clockwise=False, roundness=0.552):
-    
+def draw_circle(pen, pt, diameter=50, clockwise=False, roundness=0.552):
+    x, y = pt
     radius = 0.5 * diameter
     ctrl   = 0.5 * diameter * roundness
-    
+
     points = [
         [
             (
@@ -56,14 +56,15 @@ def draw_circle(pen, (x, y), diameter=50, clockwise=False, roundness=0.552):
     # Python automatically uses the Integer representation of the Boolean values:
     # False = 0
     # True  = 1
-    
+
     pen.moveTo((x, y - radius))
-    
+
     for ctrl1, ctrl2, pt in points:
         pen.curveTo(ctrl1, ctrl2, pt)
-    
+
     pen.closePath()
 
 
-p = CurrentGlyph().getPen()
-draw_circle(p, (275, 216), 400, False)
+if __name__ == "__main__":
+    p = CurrentGlyph().getPen()
+    draw_circle(p, (275, 216), 400, False)

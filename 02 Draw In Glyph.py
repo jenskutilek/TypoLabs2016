@@ -1,5 +1,5 @@
 # MenuTitle: 02 Draw In Glyph
-from robofab.world import CurrentGlyph
+from mojo.roboFont import CurrentGlyph
 
 CurrentGlyph().clear()
 p = CurrentGlyph().getPen()

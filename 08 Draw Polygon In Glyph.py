@@ -1,5 +1,5 @@
 # MenuTitle: 08 Draw Polygon In Glyph
-from robofab.world import CurrentGlyph
+from mojo.roboFont import CurrentGlyph
 from math import cos, pi, radians, sin
 
 
@@ -37,16 +37,17 @@ def draw_polygon(pen, x, y, diameter=50, n=8, phi=0.0, clockwise=False):
     pen.closePath()
 
 
-g = CurrentGlyph()
-g.clear()
-p = g.getPen()
+if __name__ == "__main__":
+    g = CurrentGlyph()
+    g.clear()
+    p = g.getPen()
 
-diameter = 600
-n = 8
+    diameter = 600
+    n = 8
 
-for i in range(10):
-    clockwise = bool(i % 2)
-    phi = 1.2 * i * pi
-    draw_polygon(p, 275, 216, diameter, n, phi, clockwise)
-    # n -= 1
-    diameter -= 50
+    for i in range(10):
+        clockwise = bool(i % 2)
+        phi = 1.2 * i * pi
+        draw_polygon(p, 275, 216, diameter, n, phi, clockwise)
+        # n -= 1
+        diameter -= 50

@@ -1,5 +1,5 @@
 #MenuTitle: 01 MyPen
-from robofab.world import CurrentGlyph
+from mojo.roboFont import CurrentGlyph
 from fontTools.pens.basePen import AbstractPen
 
 class MyPen(AbstractPen):
@@ -25,6 +25,6 @@ class MyPen(AbstractPen):
     def addComponent(self, baseGlyphName, transformation):
         print("pen.addComponent(%r, %s)" % (baseGlyphName, tuple(transformation)))
 
-
-p = MyPen()
-CurrentGlyph().draw(p)
+if __name__ == "__main__":
+    p = MyPen()
+    CurrentGlyph().draw(p)

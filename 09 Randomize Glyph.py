@@ -1,5 +1,5 @@
 # MenuTitle: 09 Randomize Glyph
-from robofab.world import CurrentFont, CurrentGlyph
+from mojo.roboFont import CurrentFont, CurrentGlyph
 from fontTools.pens.basePen import BasePen
 
 
@@ -23,5 +23,6 @@ class MyPen(BasePen):
         pass
 
 
-p = MyPen(CurrentFont())
-CurrentGlyph().draw(p)
+if __name__ == "__main__":
+    p = MyPen(CurrentFont())
+    CurrentGlyph().draw(p)

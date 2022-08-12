@@ -1,10 +1,10 @@
 #MenuTitle: Outline Pen
 """
-Source: https://github.com/typemytype/goldnerRoboFontExtension/blob/master/Goldener.roboFontExt/lib/outlinePen.py
+Source: https://github.com/typemytype/outlinerRoboFontExtension/blob/master/Outliner.roboFontExt/lib/outlinePen.py
 
 The MIT License (MIT)
 
-Copyright (c) 2015 Frederik Berlaen
+Copyright (c) 2016 Frederik Berlaen
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -25,22 +25,25 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from AppKit import *
-
 from fontTools.pens.basePen import BasePen
-from robofab.pens.pointPen import AbstractPointPen
-from robofab.pens.reverseContourPointPen import ReverseContourPointPen
-from robofab.pens.adapterPens import PointToSegmentPen
+from fontTools.misc.bezierTools import splitCubicAtT
+
+from fontTools.pens.pointPen import AbstractPointPen
+from fontTools.pens.pointPen import ReverseContourPointPen
+from fontTools.pens.pointPen import PointToSegmentPen
+
 
 from defcon import Glyph
-from math import sqrt, cos, sin, acos, asin, degrees, radians, tan, pi
+from math import sqrt, cos, sin, acos, asin, degrees, radians, pi
+
 
 def roundFloat(f):
     error = 1000000.
     return round(f*error)/error
 
-def checkSmooth( firstAngle, lastAngle):
-    if  firstAngle == None or lastAngle == None:
+
+def checkSmooth(firstAngle, lastAngle):
+    if firstAngle is None or lastAngle is None:
         return True
     error = 4
     firstAngle = degrees(firstAngle)
@@ -50,15 +53,16 @@ def checkSmooth( firstAngle, lastAngle):
         return True
     return False
 
+
 def checkInnerOuter(firstAngle, lastAngle):
-    if  firstAngle == None or lastAngle == None:
+    if firstAngle is None or lastAngle is None:
         return True
     dirAngle = degrees(firstAngle) - degrees(lastAngle)
 
     if dirAngle > 180:
         dirAngle = 180 - dirAngle
     elif dirAngle < -180:
-        dirAngle= -180 - dirAngle
+        dirAngle = -180 - dirAngle
 
     if dirAngle > 0:
         return True
@@ -66,20 +70,28 @@ def checkInnerOuter(firstAngle, lastAngle):
     if dirAngle <= 0:
         return False
 
-def interSect((seg1s, seg1e), (seg2s, seg2e)):
+
+def interSect(seg1, seg2):
+    seg1s, seg1e = seg1
+    seg2s, seg2e = seg2
     denom = (seg2e.y - seg2s.y)*(seg1e.x - seg1s.x) - (seg2e.x - seg2s.x)*(seg1e.y - seg1s.y)
     if roundFloat(denom) == 0:
-        #print 'parallel: %s' % denom
+        # print('parallel: %s' % denom)
         return None
     uanum = (seg2e.x - seg2s.x)*(seg1s.y - seg2s.y) - (seg2e.y - seg2s.y)*(seg1s.x - seg2s.x)
     ubnum = (seg1e.x - seg1s.x)*(seg1s.y - seg2s.y) - (seg1e.y - seg1s.y)*(seg1s.x - seg2s.x)
-    ua = uanum/denom
-    ub = ubnum/denom
+    ua = uanum / denom
+    # ub = ubnum / denom
     x = seg1s.x + ua*(seg1e.x - seg1s.x)
     y = seg1s.y + ua*(seg1e.y - seg1s.y)
     return MathPoint(x, y)
 
-def pointOnACurve((x1, y1), (cx1, cy1), (cx2, cy2), (x2, y2), value):
+
+def pointOnACurve(p1, c1, c2, p2, value):
+    x1, y1 = p1
+    cx1, cy1 = c1
+    cx2, cy2 = c2
+    x2, y2 = p2
     dx = x1
     cx = (cx1 - dx) * 3.0
     bx = (cx2 - cx1) * 3.0 - cx
@@ -91,7 +103,8 @@ def pointOnACurve((x1, y1), (cx1, cy1), (cx2, cy2), (x2, y2), value):
     mx = ax*(value)**3 + bx*(value)**2 + cx*(value) + dx
     my = ay*(value)**3 + by*(value)**2 + cy*(value) + dy
     return MathPoint(mx, my)
-    
+
+
 class MathPoint(object):
 
     def __init__(self, x, y=None):
@@ -100,8 +113,8 @@ class MathPoint(object):
         self.x = x
         self.y = y
 
-    def __repr__(self): #### print p
-        return "<MathPoint x:%s y:%s>" %(self.x, self.y)
+    def __repr__(self):
+        return "<MathPoint x:%s y:%s>" % (self.x, self.y)
 
     def __getitem__(self, index):
         if index == 0:
@@ -114,32 +127,34 @@ class MathPoint(object):
         for value in [self.x, self.y]:
             yield value
 
-    def __add__(self, p): # p+ p
+    def __add__(self, p):  # p + p
         if not isinstance(p, self.__class__):
             return self.__class__(self.x + p, self.y + p)
         return self.__class__(self.x + p.x, self.y + p.y)
 
-    def __sub__(self, p): #p - p
+    def __sub__(self, p):  # p - p
         if not isinstance(p, self.__class__):
             return self.__class__(self.x - p, self.y - p)
         return self.__class__(self.x - p.x, self.y - p.y)
 
-    def __mul__(self, p): ## p * p
+    def __mul__(self, p):  # p * p
         if not isinstance(p, self.__class__):
             return self.__class__(self.x * p, self.y * p)
         return self.__class__(self.x * p.x, self.y * p.y)
 
-    def __div__(self, p):
+    def __div__(self, p):  # p / p
         if not isinstance(p, self.__class__):
             return self.__class__(self.x / p, self.y / p)
         return self.__class__(self.x / p.x, self.y / p.y)
 
-    def __eq__(self, p): ## if p == p
-        if not isinstance(p,self.__class__):
+    __truediv__ = __div__
+
+    def __eq__(self, p):  # if p == p
+        if not isinstance(p, self.__class__):
             return False
         return roundFloat(self.x) == roundFloat(p.x) and roundFloat(self.y) == roundFloat(p.y)
 
-    def __ne__(self, p): ## if p != p
+    def __ne__(self, p):  # if p != p
         return not self.__eq__(p)
 
     def copy(self):
@@ -153,7 +168,7 @@ class MathPoint(object):
         return sqrt((p.x - self.x)**2 + (p.y - self.y)**2)
 
     def angle(self, other, add=90):
-        #### returns the angle of a Line in radians
+        # returns the angle of a Line in radians
         b = other.x - self.x
         a = other.y - self.y
         c = sqrt(a**2 + b**2)
@@ -166,6 +181,7 @@ class MathPoint(object):
         if sinAngle < 0:
             cosAngle = 360 - cosAngle
         return radians(cosAngle + add)
+
 
 class CleanPointPen(AbstractPointPen):
 
@@ -186,6 +202,7 @@ class CleanPointPen(AbstractPointPen):
                 if prevPoint["segmentType"] in ["line", "move"]:
                     angle = MathPoint(data["point"]).angle(MathPoint(prevPoint["point"]))
                     if prevAngle is not None and angle is not None and roundFloat(prevAngle) == roundFloat(angle):
+                        prevPoint["uniqueID"] = id(prevPoint)
                         toRemove.append(prevPoint)
                     prevAngle = angle
                 else:
@@ -202,7 +219,7 @@ class CleanPointPen(AbstractPointPen):
             pointPen.addPoint(data["point"], **data)
         pointPen.endPath()
 
-    def beginPath(self):
+    def beginPath(self, identifier=None):
         assert self.currentContour is None
         self.currentContour = []
         self.onCurve = []
@@ -221,12 +238,13 @@ class CleanPointPen(AbstractPointPen):
         assert self.currentContour is None
         self.pointPen.addComponent(glyphName, transform)
 
+
 class OutlinePen(BasePen):
 
     pointClass = MathPoint
     magicCurve = 0.5522847498
 
-    def __init__(self, glyphSet, offset=10, contrast=0, contrastAngle=0, connection="square", cap="round", miterLimit=None, closeOpenPaths=True, preserveComponents=False):
+    def __init__(self, glyphSet, offset=10, contrast=0, contrastAngle=0, connection="square", cap="round", miterLimit=None, closeOpenPaths=True, optimizeCurve=False, preserveComponents=False, filterDoubles=True):
         BasePen.__init__(self, glyphSet)
 
         self.offset = abs(offset)
@@ -238,6 +256,7 @@ class OutlinePen(BasePen):
         self.miterLimit = abs(miterLimit)
 
         self.closeOpenPaths = closeOpenPaths
+        self.optimizeCurve = optimizeCurve
 
         self.connectionCallback = getattr(self, "connection%s" % (connection.title()))
         self.capCallback = getattr(self, "cap%s" % (cap.title()))
@@ -267,9 +286,11 @@ class OutlinePen(BasePen):
         self.preserveComponents = preserveComponents
         self.components = []
 
+        self.filterDoubles = filterDoubles
         self.drawSettings()
 
-    def _moveTo(self, (x, y)):
+    def _moveTo(self, pt):
+        x, y = pt
         if self.offset == 0:
             self.outerPen.moveTo((x, y))
             self.innerPen.moveTo((x, y))
@@ -281,7 +302,8 @@ class OutlinePen(BasePen):
         self.firstPoint = p
         self.shouldHandleMove = True
 
-    def _lineTo(self, (x, y)):
+    def _lineTo(self, pt):
+        x, y = pt
         if self.offset == 0:
             self.outerPen.lineTo((x, y))
             self.innerPen.lineTo((x, y))
@@ -321,16 +343,25 @@ class OutlinePen(BasePen):
         self.prevPoint = currentPoint
         self.prevAngle = self.currentAngle
 
-    def _curveToOne(self, (x1, y1), (x2, y2), (x3, y3)):
-        if self.offset == 0:
-            self.outerPen.curveTo((x1, y1), (x2, y2), (x3, y3))
-            self.innerPen.curveTo((x1, y1), (x2, y2), (x3, y3))
-            return
-        self.originalPen.curveTo((x1, y1), (x2, y2), (x3, y3))
+    def _curveToOne(self, pt1, pt2, pt3):
+        if self.optimizeCurve:
+            curves = splitCubicAtT(self.prevPoint, pt1, pt2, pt3, .5)
+        else:
+            curves = [(self.prevPoint, pt1, pt2, pt3)]
+        for curve in curves:
+            p1, h1, h2, p2 = curve
+            self._processCurveToOne(h1, h2, p2)
 
-        p1 = self.pointClass(x1, y1)
-        p2 = self.pointClass(x2, y2)
-        p3 = self.pointClass(x3, y3)
+    def _processCurveToOne(self, pt1, pt2, pt3):
+        if self.offset == 0:
+            self.outerPen.curveTo(pt1, pt2, pt3)
+            self.innerPen.curveTo(pt1, pt2, pt3)
+            return
+        self.originalPen.curveTo(pt1, pt2, pt3)
+
+        p1 = self.pointClass(*pt1)
+        p2 = self.pointClass(*pt2)
+        p3 = self.pointClass(*pt3)
 
         if p1 == self.prevPoint:
             p1 = pointOnACurve(self.prevPoint, p1, p2, p3, 0.01)
@@ -346,7 +377,7 @@ class OutlinePen(BasePen):
 
         a1bis = self.prevPoint.angle(p1, 0)
         a2bis = p3.angle(p2, 0)
-        intersectPoint = interSect((self. prevPoint, self.prevPoint + self.pointClass(cos(a1), sin(a1)) * 100),
+        intersectPoint = interSect((self.prevPoint, self.prevPoint + self.pointClass(cos(a1), sin(a1)) * 100),
                                    (p3, p3 + self.pointClass(cos(a2), sin(a2)) * 100))
         self.innerCurrentPoint = self.prevPoint - self.pointClass(cos(a1), sin(a1)) * tickness1
         self.outerCurrentPoint = self.prevPoint + self.pointClass(cos(a1), sin(a1)) * tickness1
@@ -363,6 +394,7 @@ class OutlinePen(BasePen):
             self.firstAngle = a1
         else:
             self.buildConnection()
+
         h1 = None
         if intersectPoint is not None:
             h1 = interSect((self.innerCurrentPoint, self.innerCurrentPoint + self.pointClass(cos(a1bis), sin(a1bis)) * tickness1),  (intersectPoint, p1))
@@ -459,7 +491,7 @@ class OutlinePen(BasePen):
         else:
             BasePen.addComponent(self, glyphName, transform)
 
-    ## thickness
+    # thickness
 
     def getThickness(self, angle):
         a2 = angle + pi * .5
@@ -467,7 +499,7 @@ class OutlinePen(BasePen):
         f = f ** 5
         return self.offset + self.contrast * f
 
-    ## connections
+    # connections
 
     def buildConnection(self, close=False):
         if not checkSmooth(self.prevAngle, self.currentAngle):
@@ -477,7 +509,9 @@ class OutlinePen(BasePen):
             else:
                 self.connectionCallback(self.innerPrevPoint, self.innerCurrentPoint, self.innerPen, close)
                 self.connectionInnerCorner(self.outerPrevPoint, self.outerCurrentPoint, self.outerPen, close)
-
+        elif not self.filterDoubles:
+            self.innerPen.lineTo(self.innerCurrentPoint)
+            self.outerPen.lineTo(self.outerCurrentPoint)
 
     def connectionSquare(self, first, last, pen, close):
         angle_1 = radians(degrees(self.prevAngle)+90)
@@ -503,39 +537,39 @@ class OutlinePen(BasePen):
         angle_1 = radians(degrees(self.prevAngle)+90)
         angle_2 = radians(degrees(self.currentAngle)+90)
 
-        tempFirst = first - self.pointClass(cos(angle_1), sin(angle_1)) * self.miterLimit
-        tempLast = last + self.pointClass(cos(angle_2), sin(angle_2)) * self.miterLimit
+        tempFirst = first - self.pointClass(sin(angle_1), -cos(angle_1))
+        tempLast = last + self.pointClass(sin(angle_2), -cos(angle_2))
 
-        newPoint = interSect((first, tempFirst), (last, tempLast))
-        if newPoint is None:
-            pen.lineTo(last)
-            return
-        #print "(%s, %s)," % (newPoint.x, newPoint.y)
-        distance1 = newPoint.distance(first)
-        distance2 = newPoint.distance(last)
-        #print distance1, distance2
-        if roundFloat(distance1) > self.miterLimit + self.contrast:
-            distance1 = self.miterLimit + tempFirst.distance(tempLast) * .7
-        if roundFloat(distance2) > self.miterLimit + self.contrast:
-            distance2 = self.miterLimit + tempFirst.distance(tempLast) * .7
+        centerPoint = interSect((first, tempFirst), (last, tempLast))
+        if centerPoint is None:
+            # the lines are parallel, let's just take the middle
+            centerPoint = (first + last) / 2
 
-        distance1 *= self.magicCurve
-        distance2 *= self.magicCurve
+        angle_diff = (angle_1 - angle_2) % (2 * pi)
+        if angle_diff > pi:
+            angle_diff = 2 * pi - angle_diff
+        angle_half = angle_diff / 2
 
-        bcp1 = first - self.pointClass(cos(angle_1), sin(angle_1)) * distance1
-        bcp2 = last + self.pointClass(cos(angle_2), sin(angle_2)) * distance2
+        radius = centerPoint.distance(first)
+        D = radius * (1 - cos(angle_half))
+        if sin(angle_half) == 0:
+            handleLength = 0
+        else:
+            handleLength = (4 * D / 3) / sin(angle_half)  # length of the bcp line
+
+        bcp1 = first - self.pointClass(cos(angle_1), sin(angle_1)) * handleLength
+        bcp2 = last + self.pointClass(cos(angle_2), sin(angle_2)) * handleLength
         pen.curveTo(bcp1, bcp2, last)
 
     def connectionButt(self, first, last, pen, close):
         if not close:
             pen.lineTo(last)
 
-    def connectionInnerCorner(self,  first, last, pen, close):
+    def connectionInnerCorner(self, first, last, pen, close):
         if not close:
             pen.lineTo(last)
 
-
-    ## caps
+    # caps
 
     def buildCap(self, firstContour, lastContour):
         first = firstContour[-1]
@@ -550,24 +584,23 @@ class OutlinePen(BasePen):
         first = self.pointClass(first.x, first.y)
         last = self.pointClass(last.x, last.y)
 
-        angle = radians(degrees(self.firstAngle)+180)
+        angle = radians(degrees(self.firstAngle) + 180)
         self.capCallback(lastContour, firstContour, first, last, angle)
 
-
     def capButt(self, firstContour, lastContour, first, last, angle):
-        ## not nothing
+        # not nothing
         pass
 
     def capRound(self, firstContour, lastContour, first, last, angle):
-        hookedAngle = radians(degrees(angle)+90)
+        hookedAngle = radians(degrees(angle) + 90)
 
         p1 = first - self.pointClass(cos(hookedAngle), sin(hookedAngle)) * self.offset
 
         p2 = last - self.pointClass(cos(hookedAngle), sin(hookedAngle)) * self.offset
 
-        oncurve = p1 + (p2-p1)*.5
+        oncurve = p1 + (p2 - p1) * .5
 
-        roundness = .54
+        roundness = .54  # should be self.magicCurve
 
         h1 = first - self.pointClass(cos(hookedAngle), sin(hookedAngle)) * self.offset * roundness
         h2 = oncurve + self.pointClass(cos(angle), sin(angle)) * self.offset * roundness
@@ -588,7 +621,7 @@ class OutlinePen(BasePen):
         lastContour[0].smooth = True
 
     def capSquare(self, firstContour, lastContour, first, last, angle):
-        angle = radians(degrees(angle)+90)
+        angle = radians(degrees(angle) + 90)
 
         firstContour[-1].smooth = True
         lastContour[0].smooth = True
@@ -598,7 +631,6 @@ class OutlinePen(BasePen):
 
         p2 = last - self.pointClass(cos(angle), sin(angle)) * self.offset
         firstContour.addPoint((p2.x, p2.y), smooth=False, segmentType="line")
-
 
     def drawSettings(self, drawOriginal=False, drawInner=False, drawOuter=True):
         self.drawOriginal = drawOriginal
